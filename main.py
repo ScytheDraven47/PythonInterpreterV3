@@ -169,12 +169,12 @@ class MainFlow(cmd.Cmd):
             return 1
         return 0
 
-    def do_graph_sales(self, line):
+    def do_graph_scatter(self, line):
         """
-        Graphs the relationship between sales and salary per employee
-        Syntax: graph_sales
+        Graphs the relationship between sales and salary per employee as a scatter plot
+        Syntax: graph_scatter
         """
-        graph_flag = self.valid_flag(line, [], 0, self.do_graph_sales.__doc__)
+        graph_flag = self.valid_flag(line, [], 0, self.do_graph_scatter.__doc__)
         if graph_flag == 0:
             sales = []
             salary = []
@@ -187,7 +187,49 @@ class MainFlow(cmd.Cmd):
             plt.xlabel("# of Sales")
             plt.ylabel("Salary (in $1000's)")
             plt.title("Sales by salary per employee")
-            # plt.show()
+            plt.show()
+        return graph_flag
+
+    def do_graph_pie(self, line):
+        """
+        Graphs the BMIs of employees as a pie chart
+        Syntax: graph_pie
+        """
+        graph_flag = self.valid_flag(line, [], 0, self.do_graph_pie.__doc__)
+        if graph_flag == 0:
+            array = []
+            for data in ic.all_data:
+                array.append(data['bmi'].lower())
+            array.sort()
+            array2 = {x: array.count(x) for x in array}
+            labels, numbers = list(array2.keys()), list(array2.values())
+            import matplotlib.pyplot as plt
+            plt.pie(numbers, explode=(0.1, 0, 0, 0), labels=labels, autopct='%1.1f%%', shadow=True)
+            plt.title("Body Mass Index per employee")
+            plt.show()
+        return graph_flag
+
+    def do_graph_box(self, line):
+        """
+        Graphs the sales and salary of employees as a box plot
+        Syntax: graph_box
+        """
+        graph_flag = self.valid_flag(line, [], 0, self.do_graph_box.__doc__)
+        if graph_flag == 0:
+            male, female = [],[]
+            for data in ic.all_data:
+                if data['gender'] is 'M':
+                    male.append(data['salary'])
+                else:
+                    female.append(data['salary'])
+            all_data = [male, female]
+            import matplotlib.pyplot as plt
+            box_plot = plt.boxplot(all_data, labels=['Male', 'Female'], vert=True, patch_artist=True)
+            colors = ['pink', 'lightblue']
+            for patch, color in zip(box_plot['boxes'], colors):
+                patch.set_facecolor(color)
+            plt.title("Salary per employee")
+            plt.show()
         return graph_flag
 
     def do_clear(self, line):
@@ -195,7 +237,7 @@ class MainFlow(cmd.Cmd):
         Clears current held data
         Syntax: clear
         """
-        clear_flag = self.valid_flag(line, [], 0, self.do_graph_sales.__doc__)
+        clear_flag = self.valid_flag(line, [], 0, self.do_clear.__doc__)
         if clear_flag == 0:
             ic.all_data = []
         return clear_flag
@@ -205,7 +247,7 @@ class MainFlow(cmd.Cmd):
         Quits program
         Syntax: quit
         """
-        quit_flag = self.valid_flag(line, [], 0, self.do_graph_sales.__doc__)
+        quit_flag = self.valid_flag(line, [], 0, self.do_quit.__doc__)
         if quit_flag == 0:
             print("Quitting...")
             raise SystemExit
