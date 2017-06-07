@@ -10,6 +10,7 @@ from datetime import datetime
 from controllers.main_controller import InterpreterController
 from views.database_view import DatabaseView
 from views.excel_view import ExcelView
+from builder.graph_builder import BoxGraphBuilder, PieGraphBuilder, ScatterGraphBuilder, GraphDirector
 # ---------------------------------------------------
 
 # Declaration ---------------------------------------
@@ -169,68 +170,111 @@ class MainFlow(cmd.Cmd):
             return 1
         return 0
 
-    def do_graph_scatter(self, line):
+    def do_graph(self, line):
         """
-        Graphs the relationship between sales and salary per employee as a scatter plot
-        Syntax: graph_scatter
+        Creates a graph of data, given a valid flag.
+        Options are as follows:
+            graph [--scatter, --pie, --box]
+        Scatter
+            Graphs the relationship between sales and salary per employee as a scatter plot
+            Syntax: graph --scatter
+        Pie
+            Graphs the BMIs of employees as a pie chart
+            Syntax: graph --pie
+        Box
+            Graphs the sales and salary of employees as a box plot
+            Syntax: graph --box
         """
-        graph_flag = self.valid_flag(line, [], 0, self.do_graph_scatter.__doc__)
-        if graph_flag == 0:
-            sales = []
-            salary = []
-            for data in ic.all_data:
-                sales.append(data['sales'])
-                salary.append(data['salary'])
-            import matplotlib.pyplot as plt
-            plt.plot(sales, salary, 'bo')
-            plt.axis([0, 999, 0, 999])
-            plt.xlabel("# of Sales")
-            plt.ylabel("Salary (in $1000's)")
-            plt.title("Sales by salary per employee")
-            plt.show()
-        return graph_flag
+        options = {
+            "--pie": PieGraphBuilder(),
+            "--scatter": ScatterGraphBuilder(),
+            "--box": BoxGraphBuilder()
+        }
+        graph_flag = self.valid_flag(line, options.keys(), 1, self.do_graph.__doc__)
+        if graph_flag in options.keys():
+            builder = options[graph_flag]
+        else:
+            return graph_flag
+        director = GraphDirector(builder)
+        director.make_graph(ic.all_data)
+        graph = builder.get_graph()
+        graph.show()
+        return 0
 
-    def do_graph_pie(self, line):
-        """
-        Graphs the BMIs of employees as a pie chart
-        Syntax: graph_pie
-        """
-        graph_flag = self.valid_flag(line, [], 0, self.do_graph_pie.__doc__)
-        if graph_flag == 0:
-            array = []
-            for data in ic.all_data:
-                array.append(data['bmi'].lower())
-            array.sort()
-            array2 = {x: array.count(x) for x in array}
-            labels, numbers = list(array2.keys()), list(array2.values())
-            import matplotlib.pyplot as plt
-            plt.pie(numbers, explode=(0.1, 0, 0, 0), labels=labels, autopct='%1.1f%%', shadow=True)
-            plt.title("Body Mass Index per employee")
-            plt.show()
-        return graph_flag
-
-    def do_graph_box(self, line):
-        """
-        Graphs the sales and salary of employees as a box plot
-        Syntax: graph_box
-        """
-        graph_flag = self.valid_flag(line, [], 0, self.do_graph_box.__doc__)
-        if graph_flag == 0:
-            male, female = [],[]
-            for data in ic.all_data:
-                if data['gender'] is 'M':
-                    male.append(data['salary'])
-                else:
-                    female.append(data['salary'])
-            all_data = [male, female]
-            import matplotlib.pyplot as plt
-            box_plot = plt.boxplot(all_data, labels=['Male', 'Female'], vert=True, patch_artist=True)
-            colors = ['pink', 'lightblue']
-            for patch, color in zip(box_plot['boxes'], colors):
-                patch.set_facecolor(color)
-            plt.title("Salary per employee")
-            plt.show()
-        return graph_flag
+    # def do_graph_scatter(self, line):
+    #     """
+    #     Graphs the relationship between sales and salary per employee as a scatter plot
+    #     Syntax: graph_scatter
+    #     """
+    #     graph_flag = self.valid_flag(line, [], 0, self.do_graph_scatter.__doc__)
+    #     if graph_flag == 0:
+    #         scatter_builder = graph.ScatterGraphBuilder()
+    #         director = graph.GraphDirector(scatter_builder)
+    #         director.make_graph(ic.all_data)
+    #         scatter_builder.get_graph()
+    #         # sales = []
+    #         # salary = []
+    #         # for data in ic.all_data:
+    #         #     sales.append(data['sales'])
+    #         #     salary.append(data['salary'])
+    #         # import matplotlib.pyplot as plt
+    #         # plt.plot(sales, salary, 'bo')
+    #         # plt.axis([0, 999, 0, 999])
+    #         # plt.xlabel("# of Sales")
+    #         # plt.ylabel("Salary (in $1000's)")
+    #         # plt.title("Sales by salary per employee")
+    #         # plt.show()
+    #     return graph_flag
+    #
+    # def do_graph_pie(self, line):
+    #     """
+    #     Graphs the BMIs of employees as a pie chart
+    #     Syntax: graph_pie
+    #     """
+    #     graph_flag = self.valid_flag(line, [], 0, self.do_graph_pie.__doc__)
+    #     if graph_flag == 0:
+    #         pie_builder = graph.PieGraphBuilder()
+    #         director = graph.GraphDirector(pie_builder)
+    #         director.make_graph(ic.all_data)
+    #         pie_builder.get_graph()
+    #         # array = []
+    #         # for data in ic.all_data:
+    #         #     array.append(data['bmi'].lower())
+    #         # array.sort()
+    #         # array2 = {x: array.count(x) for x in array}
+    #         # labels, numbers = list(array2.keys()), list(array2.values())
+    #         # import matplotlib.pyplot as plt
+    #         # plt.pie(numbers, explode=(0.1, 0, 0, 0), labels=labels, autopct='%1.1f%%', shadow=True)
+    #         # plt.title("Body Mass Index per employee")
+    #         # plt.show()
+    #     return graph_flag
+    #
+    # def do_graph_box(self, line):
+    #     """
+    #     Graphs the sales and salary of employees as a box plot
+    #     Syntax: graph_box
+    #     """
+    #     graph_flag = self.valid_flag(line, [], 0, self.do_graph_box.__doc__)
+    #     if graph_flag == 0:
+    #         box_builder = graph.BoxGraphBuilder()
+    #         director = graph.GraphDirector(box_builder)
+    #         director.make_graph(ic.all_data)
+    #         box_builder.get_graph()
+    #         # male, female = [],[]
+    #         # for data in ic.all_data:
+    #         #     if data['gender'] is 'M':
+    #         #         male.append(data['salary'])
+    #         #     else:
+    #         #         female.append(data['salary'])
+    #         # all_data = [male, female]
+    #         # import matplotlib.pyplot as plt
+    #         # box_plot = plt.boxplot(all_data, labels=['Male', 'Female'], vert=True, patch_artist=True)
+    #         # colors = ['pink', 'lightblue']
+    #         # for patch, color in zip(box_plot['boxes'], colors):
+    #         #     patch.set_facecolor(color)
+    #         # plt.title("Salary per employee")
+    #         # plt.show()
+    #     return graph_flag
 
     def do_clear(self, line):
         """
