@@ -7,6 +7,7 @@ from datetime import datetime
 
 from models.model_validator import Validate
 from views.console_view import ConsoleView
+from strategy.validate_strategy import AgeBirthday, ValidateContext
 
 
 class InterpreterController:
@@ -52,6 +53,7 @@ class InterpreterController:
         Runs show_errors when invalidation data is found
         """
         validate = Validate()
+        age_birthday = ValidateContext(AgeBirthday())
         all_valid_data = []
         count = 0
         for data in self.all_data:
@@ -59,7 +61,7 @@ class InterpreterController:
             if False in checklist.values():
                 self.show_errors(data, checklist)
                 count += 1
-            elif not validate.validate_age_birthday(data['age'], data['birthday']):
+            elif not age_birthday.validate_data([data['age'], data['birthday']]):
                 checklist['age_birthday'] = False
                 self.show_errors(data, checklist)
                 count += 1
