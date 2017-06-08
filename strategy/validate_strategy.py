@@ -22,32 +22,27 @@ class EmployeeID(AbstractValidateStrategy):
         return bool(re.search("^[A-Z][0-9]{3}$", str(data)))
 
 
-class Gender(AbstractValidateStrategy):
+class OneLetterGender(AbstractValidateStrategy):
     def validate(self, data):
         return bool(re.search("^([MF])$", str(data).upper()))
 
 
-class Age(AbstractValidateStrategy):
+class TwoDigit(AbstractValidateStrategy):
     def validate(self, data):
         return bool(re.search("^[0-9]{2}$", str(data)))
 
 
-class Sales(AbstractValidateStrategy):
+class TwoOrThreeDigit(AbstractValidateStrategy):
     def validate(self, data):
         return bool(re.search("^[0-9]{2,3}$", str(data)))
 
 
-class BMI(AbstractValidateStrategy):
+class BMIWord(AbstractValidateStrategy):
     def validate(self, data):
         return bool(re.search("^normal$|^overweight$|^obese$|^underweight$", str(data).lower()))
 
 
-class Salary(AbstractValidateStrategy):
-    def validate(self, data):
-        return bool(re.search("^[0-9]{2,3}$", str(data)))
-
-
-class Birthday(AbstractValidateStrategy):
+class DateStringOrDatetime(AbstractValidateStrategy):
     def validate(self, data):
         if type(data) == datetime:
             return True
@@ -61,7 +56,7 @@ class Birthday(AbstractValidateStrategy):
             return False
 
 
-class AgeBirthday(AbstractValidateStrategy):
+class AgeAndBirthday(AbstractValidateStrategy):
     def validate(self, data):
         age = data[0]
         birthday = data[1]
