@@ -1,3 +1,8 @@
+# Ben Rogers-McKee (ScytheDraven47)
+# 08/06/2017
+#
+# Strategy for Validation for Interpreter project
+
 from abc import abstractmethod, ABCMeta
 import re
 from datetime import datetime
